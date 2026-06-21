@@ -8,10 +8,12 @@ import { setupPdfWorker, pdfjs } from '@/lib/pdf/pdfjs-setup'
 import { extractOcgGroups } from '@/lib/pdf/ocg-parser'
 import { countObjectsForAllPages } from '@/lib/pdf/object-counter'
 import { getLayerColor } from '@/lib/state/project-store'
+import { detectExtractMode, extractTextBlocks } from '@/lib/pdf/text-extractor'
+import { autoGuessMapping, resolveBlocks } from '@/lib/pdf/color-classifier'
 
 export default function UploadPage() {
   const router = useRouter()
-  const { setFile, setLayers } = useProjectStore()
+  const { setFile, setLayers, setExtractBlocks, upsertColorMapping } = useProjectStore()
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -22,30 +24,55 @@ export default function UploadPage() {
     setError(null)
     try {
       const arrayBuffer = await file.arrayBuffer()
-      const pdfDoc = await pdfjs.getDocument({ data: arrayBuffer }).promise
-      const ocgGroups = await extractOcgGroups(pdfDoc)
-      const counts = await countObjectsForAllPages(pdfDoc, ocgGroups)
+      const pdfDoc = await pdfjs.getDocument({ data: arrayBuffer.slice(0) }).promise
 
-      setFile(file.name, pdfDoc.numPages, arrayBuffer)
-      setLayers(
-        ocgGroups.map((group, i) => ({
-          id: crypto.randomUUID(),
-          name: group.name,
-          source: 'ocg' as const,
-          ocgRef: group.ref,
-          count: counts[group.ref] ?? 0,
-          visible: group.defaultVisible,
-          color: getLayerColor(i),
-        }))
-      )
-      router.push('/editor')
+      const page1 = await pdfDoc.getPage(1)
+      const isExtractMode = await detectExtractMode(page1)
+
+      if (isExtractMode) {
+        // Extract all pages
+        const allRawBlocks = []
+        for (let p = 0; p < pdfDoc.numPages; p++) {
+          const page = await pdfDoc.getPage(p + 1)
+          const blocks = await extractTextBlocks(page, p)
+          allRawBlocks.push(...blocks)
+        }
+        // Pole blocks: blocks whose rawText matches P\d+ pattern (no items, just pole ID)
+        const poleBlocks = allRawBlocks.filter((b) => /P\d+/.test(b.rawText) && b.items.length === 0)
+        const equipBlocks = allRawBlocks.filter((b) => b.items.length > 0)
+
+        const mappings = autoGuessMapping(equipBlocks)
+        const resolved = resolveBlocks(equipBlocks, mappings, poleBlocks)
+
+        setFile(file.name, pdfDoc.numPages, arrayBuffer)
+        setExtractBlocks(resolved)
+        mappings.forEach((m) => upsertColorMapping(m))
+        router.push('/extract')
+      } else {
+        // Existing OCG/zone flow
+        const ocgGroups = await extractOcgGroups(pdfDoc)
+        const counts = await countObjectsForAllPages(pdfDoc, ocgGroups)
+        setFile(file.name, pdfDoc.numPages, arrayBuffer)
+        setLayers(
+          ocgGroups.map((group, i) => ({
+            id: crypto.randomUUID(),
+            name: group.name,
+            source: 'ocg' as const,
+            ocgRef: group.ref,
+            count: counts[group.ref] ?? 0,
+            visible: group.defaultVisible,
+            color: getLayerColor(i),
+          }))
+        )
+        router.push('/editor')
+      }
     } catch (err) {
       setError('Failed to process PDF. Please try a valid PDF file.')
       console.error(err)
     } finally {
       setIsProcessing(false)
     }
-  }, [router, setFile, setLayers])
+  }, [router, setFile, setLayers, setExtractBlocks, upsertColorMapping])
 
   return (
     <>
