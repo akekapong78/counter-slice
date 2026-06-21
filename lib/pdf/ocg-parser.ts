@@ -11,9 +11,12 @@ export async function extractOcgGroups(pdfDoc: PDFDocumentProxy): Promise<OcgGro
   const groups = ocConfig.getGroups()
   if (!groups) return []
 
-  return Object.entries(groups).map(([ref, group]) => ({
-    ref,
-    name: group.name ?? ref,
-    defaultVisible: true,
-  }))
+  return Object.entries(groups).map(([ref, group]) => {
+    const g = group as { name?: string }
+    return {
+      ref,
+      name: g.name ?? ref,
+      defaultVisible: true,
+    }
+  })
 }

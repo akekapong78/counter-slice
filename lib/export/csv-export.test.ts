@@ -5,7 +5,7 @@ describe('exportCsv', () => {
 
   beforeEach(() => {
     createObjectURL = vi.fn().mockReturnValue('blob:mock')
-    global.URL.createObjectURL = createObjectURL
+    global.URL.createObjectURL = createObjectURL as unknown as typeof URL.createObjectURL
     global.URL.revokeObjectURL = vi.fn()
     vi.spyOn(document.body, 'appendChild').mockImplementation((el: any) => {
       el.click = vi.fn()
