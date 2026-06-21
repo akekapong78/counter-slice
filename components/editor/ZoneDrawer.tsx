@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { useProjectStore } from '@/lib/state/project-store'
 import { countObjectsInZone } from '@/lib/pdf/zone-counter'
 import { getLayerColor } from '@/lib/state/project-store'
@@ -16,9 +16,17 @@ type DrawState = { startX: number; startY: number; endX: number; endY: number }
 
 export function ZoneDrawer({ pageIndex, onZoneComplete }: Props) {
   const overlayRef = useRef<SVGSVGElement>(null)
+  const pdfDocRef = useRef<import('pdfjs-dist').PDFDocumentProxy | null>(null)
   const [drawing, setDrawing] = useState<DrawState | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const { pdfData, layers, addLayer } = useProjectStore()
+
+  useEffect(() => {
+    if (!pdfData) return
+    pdfjs.getDocument({ data: pdfData.slice(0) }).promise.then((doc) => {
+      pdfDocRef.current = doc
+    })
+  }, [pdfData])
 
   const getCoords = (e: React.MouseEvent) => {
     const rect = overlayRef.current!.getBoundingClientRect()
@@ -52,7 +60,8 @@ export function ZoneDrawer({ pageIndex, onZoneComplete }: Props) {
 
     setIsProcessing(true)
     try {
-      const pdfDoc = await pdfjs.getDocument({ data: pdfData.slice(0) }).promise
+      const pdfDoc = pdfDocRef.current
+      if (!pdfDoc) return
       const page = await pdfDoc.getPage(pageIndex + 1)
       const count = await countObjectsInZone(page, zoneRect)
 
@@ -70,7 +79,7 @@ export function ZoneDrawer({ pageIndex, onZoneComplete }: Props) {
       setIsProcessing(false)
       onZoneComplete()
     }
-  }, [drawing, pdfData, pageIndex, addLayer, layers.length, onZoneComplete])
+  }, [drawing, pageIndex, addLayer, layers.length, onZoneComplete])
 
   const rect = drawing
     ? {
@@ -89,6 +98,7 @@ export function ZoneDrawer({ pageIndex, onZoneComplete }: Props) {
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
+      onMouseLeave={() => setDrawing(null)}
     >
       {rect && (
         <rect
