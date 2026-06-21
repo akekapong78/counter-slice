@@ -49,7 +49,7 @@ async function collectSegments(page: PDFPageProxy): Promise<GlyphSegment[]> {
       curY = args[5] as number
     } else if (fn === SHOW_TEXT || fn === SHOW_SPACED_TEXT) {
       // args[0] may be an array of glyphs, or an array containing an array of glyphs
-      let raw = Array.isArray(args[0]) ? args[0] : []
+      const raw = Array.isArray(args[0]) ? args[0] : []
       const glyphs = (raw.length > 0 && Array.isArray(raw[0]))
         ? (raw[0] as unknown[])
         : raw

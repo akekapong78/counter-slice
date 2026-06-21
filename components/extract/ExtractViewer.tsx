@@ -47,7 +47,7 @@ export function ExtractViewer({ pdfData, pageIndex, pageCount, blocks, selectedB
       canvas.width = viewport.width
       canvas.height = viewport.height
       const ctx = canvas.getContext('2d')!
-      page.render({ canvasContext: ctx, viewport }).promise
+      void page.render({ canvasContext: ctx, viewport }).promise
     })
 
     return () => { cancelled = true }
