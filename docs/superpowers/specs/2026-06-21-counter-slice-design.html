@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Counter-Slice — Design Plan</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.6; }
+  h1 { font-size: 2rem; font-weight: 700; color: #93c5fd; margin-bottom: 0.25rem; }
+  h2 { font-size: 1.25rem; font-weight: 600; color: #60a5fa; margin-bottom: 1rem; border-left: 3px solid #3b82f6; padding-left: 0.75rem; }
+  .hero { background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); padding: 2.5rem 2rem 1.5rem; border-bottom: 1px solid #1e40af; }
+  .hero p { color: #94a3b8; font-size: 0.95rem; margin-top: 0.5rem; }
+  .badge { display: inline-block; background: #1e3a5f; color: #93c5fd; border: 1px solid #3b82f6; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.75rem; margin-right: 0.4rem; margin-top: 0.5rem; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 3rem; }
+  .section { background: #1e293b; border-radius: 12px; border: 1px solid #334155; padding: 1.75rem; }
+  .diagram-wrap { background: #0f172a; border-radius: 8px; border: 1px solid #1e3a5f; padding: 1rem; cursor: zoom-in; transition: border-color 0.2s; overflow: auto; }
+  .diagram-wrap:hover { border-color: #3b82f6; }
+  .diagram-wrap svg { max-width: 100%; height: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  th { background: #1e3a5f; color: #93c5fd; padding: 0.6rem 1rem; text-align: left; font-weight: 600; }
+  td { padding: 0.6rem 1rem; border-bottom: 1px solid #334155; color: #cbd5e1; }
+  tr:last-child td { border-bottom: none; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .card { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 1.25rem; }
+  .card h3 { font-size: 0.875rem; font-weight: 600; color: #60a5fa; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .card ul { list-style: none; color: #94a3b8; font-size: 0.875rem; }
+  .card ul li { padding: 0.25rem 0; padding-left: 1rem; position: relative; }
+  .card ul li::before { content: '→'; position: absolute; left: 0; color: #3b82f6; }
+  .label { font-size: 0.75rem; color: #64748b; margin-bottom: 0.5rem; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; cursor: zoom-out; align-items: center; justify-content: center; }
+  .modal-overlay.active { display: flex; }
+  .modal-content { max-width: 95vw; max-height: 95vh; overflow: auto; background: #0f172a; border-radius: 12px; border: 1px solid #3b82f6; padding: 1rem; }
+  .modal-content svg { width: 100%; height: auto; }
+  .hint { font-size: 0.75rem; color: #475569; margin-top: 0.5rem; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Counter-Slice</h1>
+  <p>PDF OCG Layer Counter — Design Plan · 2026-06-21</p>
+  <div style="margin-top:0.75rem">
+    <span class="badge">Next.js 14 App Router</span>
+    <span class="badge">pdfjs-dist</span>
+    <span class="badge">Zustand</span>
+    <span class="badge">jsPDF</span>
+    <span class="badge">SheetJS</span>
+    <span class="badge">Static Export</span>
+    <span class="badge">No Backend</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Section 1: Architecture Overview -->
+  <div class="section">
+    <h2>1. Architecture Overview</h2>
+    <div class="diagram-wrap" id="arch-wrap">
+      <div class="mermaid" id="arch-diagram">
+flowchart TD
+    U["🌐 Browser\n(Next.js static export)"]
+
+    subgraph Pages["App Router Pages"]
+      P1["/  Upload"]
+      P2["/editor  Layer Editor"]
+      P3["/report  Report Preview"]
+    end
+
+    subgraph Lib["lib/"]
+      OCG["ocg-parser.ts\nExtract OCG groups"]
+      OBJ["object-counter.ts\nCount objects per layer"]
+      ZON["zone-counter.ts\nCount in drawn zone"]
+      STORE["project-store.ts\nZustand state"]
+      JPIO["json-io.ts\nExport/Import JSON"]
+      PDFEX["pdf-report.ts\njsPDF"]
+      CSV["csv-export.ts"]
+      XLS["excel-export.ts\nSheetJS"]
+    end
+
+    subgraph Worker["PDF.js Web Worker"]
+      PDFJS["pdfjs-dist\ngetOptionalContentConfig\ngetOperatorList"]
+    end
+
+    U --> Pages
+    P1 -->|"FileReader ArrayBuffer"| OCG
+    OCG --> PDFJS
+    OBJ --> PDFJS
+    ZON --> PDFJS
+    OCG -->|layers| STORE
+    OBJ -->|counts| STORE
+    ZON -->|zone counts| STORE
+    P2 --> STORE
+    P3 --> STORE
+    P3 --> PDFEX
+    P3 --> CSV
+    P3 --> XLS
+    P3 --> JPIO
+      </div>
+    </div>
+    <p class="hint">Click diagram to zoom</p>
+  </div>
+
+  <!-- Section 2: Before / After -->
+  <div class="section">
+    <h2>2. Before / After</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Before — Manual Process</h3>
+        <ul>
+          <li>Open PDF in Acrobat</li>
+          <li>Manually find layer panel</li>
+          <li>Count objects by eye or export</li>
+          <li>Copy numbers into spreadsheet manually</li>
+          <li>Format report in Word/Excel</li>
+          <li>No audit trail of zone definitions</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>After — Counter-Slice</h3>
+        <ul>
+          <li>Upload PDF to browser</li>
+          <li>OCG layers auto-detected + counted</li>
+          <li>Draw zones for unlayered content</li>
+          <li>Rename layers inline</li>
+          <li>One-click export PDF / CSV / Excel</li>
+          <li>Save/restore project via JSON</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: User Flow -->
+  <div class="section">
+    <h2>3. User Flow</h2>
+    <div class="diagram-wrap" id="flow-wrap">
+      <div class="mermaid" id="flow-diagram">
+flowchart LR
+    A([Upload PDF]) -->|FileReader| B[ocg-parser\nextract OCGs]
+    B -->|OCG groups| C{Has OCG\nlayers?}
+    C -->|Yes| D[Auto-count objects\nper OCG layer]
+    C -->|No| E[Show empty layer list]
+    D --> F[Zustand store\nlayers + counts]
+    E --> F
+    F --> G[Layer Editor\n/editor]
+    G -->|drag zone| H[ZoneDrawer\ndraw rectangle]
+    H --> I[zone-counter\ncount in rect]
+    I -->|new zone layer| F
+    G -->|rename| F
+    G -->|toggle visible| F
+    F --> J[Report Preview\n/report]
+    J --> K1[Download PDF]
+    J --> K2[Export CSV]
+    J --> K3[Export Excel]
+    J --> K4[Save JSON]
+    K4 -.->|re-upload PDF\n+ import JSON| A
+      </div>
+    </div>
+    <p class="hint">Click diagram to zoom</p>
+  </div>
+
+  <!-- Section 4: Component Data Flow -->
+  <div class="section">
+    <h2>4. Component / Data Flow</h2>
+    <div class="diagram-wrap" id="seq-wrap">
+      <div class="mermaid" id="seq-diagram">
+sequenceDiagram
+    participant U as User
+    participant Drop as Dropzone
+    participant Parser as ocg-parser
+    participant Worker as PDF.js Worker
+    participant Store as Zustand Store
+    participant Editor as Layer Editor
+    participant Zone as ZoneDrawer
+    participant Report as Report Preview
+
+    U->>Drop: Drop PDF file
+    Drop->>Parser: ArrayBuffer
+    Parser->>Worker: getOptionalContentConfig()
+    Worker-->>Parser: OCG groups[]
+    Parser->>Worker: getOperatorList() per page
+    Worker-->>Parser: operator list
+    Parser->>Store: layers[] with counts
+    Store-->>Editor: render layer sidebar
+
+    U->>Editor: drag rectangle on canvas
+    Editor->>Zone: normalized Rect
+    Zone->>Worker: getOperatorList()
+    Worker-->>Zone: operator list
+    Zone->>Store: new zone Layer + count
+
+    U->>Editor: rename layer
+    Editor->>Store: update layer.name
+
+    U->>Report: navigate
+    Report->>Store: read layers[]
+    U->>Report: click Export PDF
+    Report->>Report: jsPDF render → download
+      </div>
+    </div>
+    <p class="hint">Click diagram to zoom</p>
+  </div>
+
+  <!-- Section 5: Implementation Order -->
+  <div class="section">
+    <h2>5. Implementation Order</h2>
+    <div class="diagram-wrap" id="gantt-wrap">
+      <div class="mermaid" id="gantt-diagram">
+gantt
+    title Counter-Slice Build Plan
+    dateFormat  X
+    axisFormat  Phase %s
+
+    section Foundation
+    Next.js setup + Tailwind + design tokens    :p1, 0, 1
+    pdfjs-dist worker config                    :p2, 1, 2
+
+    section Core PDF Logic
+    ocg-parser (extract OCG groups)             :p3, 2, 3
+    object-counter (count per OCG)              :p4, 3, 4
+    Zustand project-store                       :p5, 4, 5
+
+    section Upload Screen
+    Dropzone component + /page.tsx              :p6, 5, 6
+
+    section Layer Editor
+    PdfViewer (pdfjs canvas render)             :p7, 6, 7
+    LayerSidebar (toggle, rename, count)        :p8, 7, 8
+    ZoneDrawer + zone-counter                   :p9, 8, 9
+
+    section Report + Export
+    ReportPreview component                     :p10, 9, 10
+    pdf-report.ts (jsPDF)                       :p11, 10, 11
+    csv-export + excel-export (SheetJS)         :p12, 11, 12
+    json-io (export/import)                     :p13, 12, 13
+      </div>
+    </div>
+    <p class="hint">Click diagram to zoom</p>
+  </div>
+
+  <!-- Section 6: Tech Decisions -->
+  <div class="section">
+    <h2>6. Key Technical Decisions</h2>
+    <table>
+      <thead>
+        <tr><th>Decision</th><th>Choice</th><th>Reason</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Framework</td><td>Next.js 14 App Router</td><td>Modern pattern, static export, file-based routing</td></tr>
+        <tr><td>PDF Engine</td><td>pdfjs-dist + custom OCG parser</td><td>Only browser-native PDF lib with OCG + operator list API</td></tr>
+        <tr><td>State</td><td>Zustand</td><td>Minimal boilerplate, works cleanly with client components</td></tr>
+        <tr><td>PDF Export</td><td>jsPDF + jspdf-autotable</td><td>Mature, no server needed</td></tr>
+        <tr><td>Excel Export</td><td>SheetJS (xlsx)</td><td>Industry standard for browser XLSX generation</td></tr>
+        <tr><td>JSON persistence</td><td>File export/import (no localStorage)</td><td>User controls their data, no storage limits</td></tr>
+        <tr><td>Deployment</td><td>Static export (output: 'export')</td><td>Zero server cost, CDN-deployable</td></tr>
+        <tr><td>Styling</td><td>Tailwind CSS + design tokens from DESIGN.md</td><td>Design system already defined by Stitch</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Modal overlay for zoom -->
+<div class="modal-overlay" id="modal" onclick="closeModal()">
+  <div class="modal-content" id="modal-content" onclick="event.stopPropagation()"></div>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: { primaryColor: '#1e3a5f', primaryTextColor: '#e2e8f0', primaryBorderColor: '#3b82f6', lineColor: '#60a5fa', secondaryColor: '#0f172a', tertiaryColor: '#1e293b', background: '#0f172a', mainBkg: '#1e293b', nodeBorder: '#3b82f6', clusterBkg: '#1e293b', titleColor: '#93c5fd', edgeLabelBackground: '#1e293b', fontSize: '14px' } });
+
+  async function renderDiagrams() {
+    await mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
+    document.querySelectorAll('.diagram-wrap').forEach(wrap => {
+      wrap.addEventListener('click', () => openModal(wrap));
+    });
+  }
+
+  function openModal(wrap) {
+    const svg = wrap.querySelector('svg');
+    if (!svg) return;
+    const serializer = new XMLSerializer();
+    const svgStr = serializer.serializeToString(svg);
+    const vw = window.innerWidth * 0.9;
+    const vh = window.innerHeight * 0.9;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgStr, 'image/svg+xml');
+    const svgEl = doc.documentElement;
+    const origW = parseFloat(svgEl.getAttribute('width') || svg.getBoundingClientRect().width);
+    const origH = parseFloat(svgEl.getAttribute('height') || svg.getBoundingClientRect().height);
+    const scale = Math.min(vw / origW, vh / origH, 2);
+    svgEl.setAttribute('width', origW * scale);
+    svgEl.setAttribute('height', origH * scale);
+    document.getElementById('modal-content').innerHTML = new XMLSerializer().serializeToString(svgEl);
+    document.getElementById('modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+    document.getElementById('modal-content').innerHTML = '';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  renderDiagrams();
+</script>
+</body>
+</html>

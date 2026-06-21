@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PDF Report Preview | DocLayer AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#bec6e0",
+                    "error-container": "#ffdad6",
+                    "secondary": "#565e74",
+                    "inverse-on-surface": "#eaf1ff",
+                    "background": "#f8f9ff",
+                    "on-error-container": "#93000a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-bright": "#f8f9ff",
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#e3e6ff",
+                    "on-error": "#ffffff",
+                    "on-tertiary-container": "#e5e8ea",
+                    "secondary-container": "#dae2fd",
+                    "tertiary-fixed": "#e0e3e5",
+                    "error": "#ba1a1a",
+                    "on-surface": "#0b1c30",
+                    "on-surface-variant": "#434656",
+                    "inverse-surface": "#213145",
+                    "surface-variant": "#d3e4fe",
+                    "on-tertiary-fixed-variant": "#444749",
+                    "on-primary-fixed": "#001551",
+                    "primary-fixed": "#dce1ff",
+                    "surface-container-low": "#eff4ff",
+                    "inverse-primary": "#b6c4ff",
+                    "on-tertiary": "#ffffff",
+                    "primary": "#0041c8",
+                    "outline": "#737688",
+                    "tertiary-container": "#65686a",
+                    "outline-variant": "#c3c5d9",
+                    "on-primary": "#ffffff",
+                    "primary-container": "#0055ff",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "surface-dim": "#cbdbf5",
+                    "on-secondary-fixed": "#131b2e",
+                    "tertiary-fixed-dim": "#c4c7c9",
+                    "on-tertiary-fixed": "#191c1e",
+                    "surface-container-highest": "#d3e4fe",
+                    "tertiary": "#4d5052",
+                    "on-secondary-container": "#5c647a",
+                    "surface-tint": "#004dea",
+                    "primary-fixed-dim": "#b6c4ff",
+                    "secondary-fixed": "#dae2fd",
+                    "surface-container": "#e5eeff",
+                    "on-primary-fixed-variant": "#0039b3",
+                    "surface": "#f8f9ff",
+                    "surface-container-high": "#dce9ff",
+                    "on-background": "#0b1c30"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "base": "8px",
+                    "max-width": "1440px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "xl": "32px",
+                    "lg": "24px",
+                    "margin": "32px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "label-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pdf-preview-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .pdf-preview-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .pdf-preview-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .glass-toolbar {
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-on-surface border-b border-outline-variant dark:border-outline docked full-width top-0 z-50">
+<div class="flex justify-between items-center w-full px-margin h-16 max-w-max-width mx-auto">
+<div class="flex items-center gap-xl">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">DocLayer AI</span>
+<nav class="hidden md:flex items-center gap-lg font-body-md text-body-md">
+<a class="text-on-surface-variant dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Workspace</a>
+<a class="text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1" href="#">Library</a>
+<a class="text-on-surface-variant dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Templates</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-sm mr-md">
+<button class="material-symbols-outlined text-on-surface-variant p-base hover:bg-surface-container-high rounded-full transition-colors" data-icon="help">help</button>
+<button class="material-symbols-outlined text-on-surface-variant p-base hover:bg-surface-container-high rounded-full transition-colors" data-icon="settings">settings</button>
+</div>
+<button class="bg-primary-container text-on-primary text-label-md font-label-md px-lg py-sm rounded-lg hover:opacity-90 transition-all duration-200">New Project</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A clean, professional headshot of a female business analyst in a bright corporate setting. The image uses a soft, light-mode aesthetic with cool blue and crisp white tones. The lighting is flattering and even, emphasizing a high-end professional atmosphere. The focus is sharp on the person against a slightly blurred office background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB59rkt5J8FoepakDyevnZlH1E3HTETvGKmVC2Uimh2MoqufIBYRkeMm6B8Lg1XZFiNW41wNy98h_BuvuBKJJfjlpGnznrDNE_-kOI6_hJe7XuvMQWATyeR7qGkcbCkxNOezexSExt4H2PjsZx6IHEYCni6PFCetHuIkM3skgX0r-Kqh3_RPS_Ofgb7Q7sX8g20uWDeJ_nPXb7lU5sEx9WjtixJs9cAr_cxvsbW4xSnlRUlfyR4R3eTKH9Mf9U8klG52BxMsn9QDK4S"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-max-width mx-auto px-margin py-xl flex flex-col gap-xl">
+<!-- Action Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-lg">
+<div>
+<button class="flex items-center gap-xs text-primary font-label-md mb-xs hover:underline">
+<span class="material-symbols-outlined text-[18px]" data-icon="arrow_back">arrow_back</span>
+                    Back to Editor
+                </button>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Report Preview: Inventory Summary</h1>
+</div>
+<div class="flex items-center gap-md">
+<button class="px-xl py-md bg-primary text-on-primary rounded-lg font-label-md hover:shadow-lg transition-all flex items-center gap-sm">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+                    Download PDF Report
+                </button>
+</div>
+</div>
+<!-- Dashboard Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-xl items-start">
+<!-- Left: PDF Preview Container -->
+<div class="lg:col-span-7 bg-surface-container-low rounded-xl border border-outline-variant relative h-[800px] overflow-hidden flex flex-col shadow-sm">
+<!-- PDF Controls Glassbar -->
+<div class="glass-toolbar absolute top-md left-1/2 -translate-x-1/2 flex items-center gap-md px-lg py-sm rounded-full border border-outline-variant shadow-md z-10">
+<div class="flex items-center gap-xs">
+<button class="material-symbols-outlined p-xs hover:bg-surface-container-highest rounded-md" data-icon="zoom_out">zoom_out</button>
+<span class="text-label-md px-base">100%</span>
+<button class="material-symbols-outlined p-xs hover:bg-surface-container-highest rounded-md" data-icon="zoom_in">zoom_in</button>
+</div>
+<div class="w-px h-4 bg-outline-variant"></div>
+<div class="flex items-center gap-xs text-label-md">
+<span class="text-on-surface">Page 1</span>
+<span class="text-on-surface-variant">of 4</span>
+</div>
+<div class="w-px h-4 bg-outline-variant"></div>
+<button class="material-symbols-outlined p-xs hover:bg-surface-container-highest rounded-md" data-icon="print">print</button>
+</div>
+<!-- PDF Content Canvas -->
+<div class="flex-grow overflow-y-auto pdf-preview-scroll p-xl flex justify-center bg-surface-dim/20">
+<div class="bg-white w-full max-w-[595px] shadow-xl rounded-sm p-[40px] flex flex-col gap-lg min-h-[842px]">
+<!-- Report Header -->
+<div class="flex justify-between items-start border-b-4 border-primary pb-lg">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-tight">Inventory Report</h2>
+<p class="text-label-sm text-on-surface-variant mt-xs">DOCUMENT ID: #DL-2024-0812</p>
+</div>
+<div class="text-right">
+<p class="font-bold text-primary">DocLayer AI</p>
+<p class="text-label-sm text-on-surface-variant">Report Generated: Aug 12, 2024</p>
+</div>
+</div>
+<!-- Visual Assets in PDF -->
+<div class="grid grid-cols-2 gap-md mt-md">
+<div class="h-32 rounded-lg bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover opacity-80" data-alt="A clean, minimalist 3D rendering of a warehouse inventory layout with organized shelving and glowing blue data points. The style is professional and corporate, using a light slate and azure color palette. Soft overhead lighting creates a sterile, high-tech environment perfect for an inventory report visualization." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC__PfnSckPN7_n3mAiyGyD-HzQNgDYJ28skPwcLzPPnEx-5bxJ4-bx4izqkBMbqPNZeiVGxDaJ8UUnANWKoIrH9Hsfmh6U1KoiWLpx42JgiR1QcomM3d6mxnTSOaE9dY-5V5C8SS-dbtTL2GdihgrZujNDTYyQhSz5DOpdsIwxi7ddnJdhj-SuUoJeziAPlvlZeIbuqn61ikBVGdSLKEv-cb3717VakN5sOtUkqDyj2Uk_sdWNedMw5E3AHxN3bpErMYA7P6crpch4"/>
+</div>
+<div class="h-32 rounded-lg bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover opacity-80" data-alt="A professional data visualization chart showing layer distributions in shades of blue and gray. The graphic is clean, high-resolution, and adheres to a modern corporate aesthetic. It features crisp labels and a minimalist grid background, suggesting precision and analytical depth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFtSpNkxOp3ZR-7ue0rNUK2ORlnRgZvHKGM31E2Uz6tus0Ai_W1V72VULbGrbILhloy2OYEBvs-rhDQ1bw4fF1Wrgu-VkXmfSdL62AHE-oqmBmml13Mx-BGREt2uLyUTHSEXS3PERTD6-EGLL58Mwcd5-1pY2uEksZCZm8_YTw3QuUFAkGfG67nh6EYIWETaiZXBoBHbVyMsXOnu5xJ81KyESEC36V_7BZEIU1v0pNIk63XHKt6GXwcjyRUD2Zq06v4QAG3bzJRK8p"/>
+</div>
+</div>
+<!-- Report Summary Text -->
+<div class="space-y-sm mt-md">
+<h3 class="font-headline-sm text-[16px] text-on-surface border-b border-outline-variant pb-xs">Executive Summary</h3>
+<p class="text-body-sm text-on-surface-variant">This report summarizes the finalized inventory layers processed via DocLayer AI. All layers have been verified against the master manifest. Data extraction confidence remains at 99.4% across the 12 primary categories.</p>
+</div>
+<!-- The Main Table Preview -->
+<div class="mt-lg">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low">
+<th class="py-sm px-md text-label-sm uppercase text-on-surface-variant font-bold border-b border-outline-variant">Layer Name</th>
+<th class="py-sm px-md text-label-sm uppercase text-on-surface-variant font-bold border-b border-outline-variant text-right">Items</th>
+<th class="py-sm px-md text-label-sm uppercase text-on-surface-variant font-bold border-b border-outline-variant text-right">Status</th>
+</tr>
+</thead>
+<tbody class="text-body-sm">
+<tr class="border-b border-outline-variant">
+<td class="py-md px-md font-medium">Primary Chassis</td>
+<td class="py-md px-md text-right">1,240</td>
+<td class="py-md px-md text-right text-primary font-bold">Finalized</td>
+</tr>
+<tr class="border-b border-outline-variant">
+<td class="py-md px-md font-medium">Optical Sensors</td>
+<td class="py-md px-md text-right">4,812</td>
+<td class="py-md px-md text-right text-primary font-bold">Finalized</td>
+</tr>
+<tr class="border-b border-outline-variant">
+<td class="py-md px-md font-medium">Internal Wiring</td>
+<td class="py-md px-md text-right">12,400</td>
+<td class="py-md px-md text-right text-primary font-bold">Finalized</td>
+</tr>
+<tr class="border-b border-outline-variant">
+<td class="py-md px-md font-medium">Cooling Systems</td>
+<td class="py-md px-md text-right">845</td>
+<td class="py-md px-md text-right text-primary font-bold">Finalized</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-auto pt-xl text-center border-t border-outline-variant">
+<p class="text-label-sm text-on-surface-variant">Generated by DocLayer AI V1.2.0 - Page 1 of 4</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Stats and Analysis Details -->
+<div class="lg:col-span-5 flex flex-col gap-lg">
+<!-- Summary Card -->
+<div class="bg-surface-container-highest/30 rounded-xl p-xl border border-outline-variant shadow-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-lg">Finalized Layers Inventory</h3>
+<div class="space-y-md">
+<!-- Stat Row -->
+<div class="flex items-center justify-between p-md bg-white rounded-lg border border-outline-variant">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+</div>
+<div>
+<p class="text-label-sm text-on-surface-variant">Total Layers</p>
+<p class="font-headline-sm text-[18px]">12 Active</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Stat Row -->
+<div class="flex items-center justify-between p-md bg-white rounded-lg border border-outline-variant">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="data_usage">data_usage</span>
+</div>
+<div>
+<p class="text-label-sm text-on-surface-variant">Total Count</p>
+<p class="font-headline-sm text-[18px]">19,297 items</p>
+</div>
+</div>
+<span class="text-label-sm text-primary font-bold">+4.2%</span>
+</div>
+</div>
+<!-- Chart Placeholder -->
+<div class="mt-xl h-48 w-full bg-white rounded-xl border border-outline-variant p-md flex items-end justify-between gap-base">
+<div class="w-full bg-primary/20 h-3/4 rounded-t-sm"></div>
+<div class="w-full bg-primary/40 h-2/4 rounded-t-sm"></div>
+<div class="w-full bg-primary/60 h-4/5 rounded-t-sm"></div>
+<div class="w-full bg-primary/80 h-3/5 rounded-t-sm"></div>
+<div class="w-full bg-primary h-full rounded-t-sm"></div>
+<div class="w-full bg-primary/50 h-1/4 rounded-t-sm"></div>
+</div>
+</div>
+<!-- Export Options Card -->
+<div class="bg-white rounded-xl p-xl border border-outline-variant shadow-sm">
+<h3 class="font-label-md font-bold text-on-surface mb-md">Export Configuration</h3>
+<div class="space-y-md">
+<div class="flex items-center justify-between">
+<span class="text-body-sm text-on-surface-variant">Resolution</span>
+<span class="text-label-md font-bold">300 DPI (High)</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-body-sm text-on-surface-variant">Format</span>
+<span class="text-label-md font-bold">PDF/A-1b</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-body-sm text-on-surface-variant">Metadata Tags</span>
+<span class="text-label-md font-bold">Applied</span>
+</div>
+<div class="pt-md border-t border-outline-variant">
+<label class="flex items-center gap-sm cursor-pointer">
+<input checked="" class="rounded text-primary focus:ring-primary h-5 w-5 border-outline-variant" type="checkbox"/>
+<span class="text-body-sm text-on-surface">Include raw data appendix</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Assistance Card -->
+<div class="bg-surface-container-high rounded-xl p-lg flex items-center gap-lg">
+<div class="bg-white p-base rounded-full shadow-sm">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div>
+<p class="font-label-md font-bold">AI Insight</p>
+<p class="text-body-sm text-on-surface-variant">Report contains no anomalies. Analysis complete.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-on-surface border-t border-outline-variant mt-auto">
+<div class="w-full py-lg px-margin flex flex-col md:flex-row justify-between items-center max-w-max-width mx-auto gap-md">
+<div class="flex flex-col md:flex-row items-center gap-md">
+<span class="font-label-sm text-label-sm font-bold text-primary dark:text-primary-fixed">DocLayer AI</span>
+<span class="text-on-surface-variant dark:text-secondary-fixed-dim font-body-sm text-body-sm">© 2024 DocLayer AI. Professional PDF Reporting.</span>
+</div>
+<div class="flex items-center gap-lg">
+<a class="text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed font-body-sm text-body-sm transition-opacity opacity-90 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed font-body-sm text-body-sm transition-opacity opacity-90 hover:opacity-100" href="#">Terms of Service</a>
+<a class="text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed font-body-sm text-body-sm transition-opacity opacity-90 hover:opacity-100" href="#">API Docs</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for primary button
+        const downloadBtn = document.querySelector('button.bg-primary');
+        downloadBtn.addEventListener('mousedown', () => {
+            downloadBtn.classList.add('scale-95', 'opacity-80');
+        });
+        downloadBtn.addEventListener('mouseup', () => {
+            downloadBtn.classList.remove('scale-95', 'opacity-80');
+        });
+    </script>
+</body></html>
