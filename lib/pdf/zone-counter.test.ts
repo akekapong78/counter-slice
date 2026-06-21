@@ -6,10 +6,12 @@ const OPS_MOVE_TO = 13
 const OPS_STROKE = 19
 const OPS_FILL = 20
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function makeMockPage(fnArray: number[], argsArray: any[][], width = 100, height = 100) {
   return {
     getOperatorList: vi.fn().mockResolvedValue({ fnArray, argsArray }),
     getViewport: vi.fn().mockReturnValue({ width, height }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any
 }
 

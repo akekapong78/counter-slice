@@ -10,9 +10,11 @@ const OPS = {
   showText: 43,
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function makeMockPage(fnArray: number[], argsArray: any[][]) {
   return {
     getOperatorList: vi.fn().mockResolvedValue({ fnArray, argsArray }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any
 }
 

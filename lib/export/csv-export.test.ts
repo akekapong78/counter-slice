@@ -7,6 +7,7 @@ describe('exportCsv', () => {
     createObjectURL = vi.fn().mockReturnValue('blob:mock')
     global.URL.createObjectURL = createObjectURL as unknown as typeof URL.createObjectURL
     global.URL.revokeObjectURL = vi.fn()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.spyOn(document.body, 'appendChild').mockImplementation((el: any) => {
       el.click = vi.fn()
       return el

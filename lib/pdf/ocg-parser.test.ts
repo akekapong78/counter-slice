@@ -6,6 +6,7 @@ function makeMockPdfDoc(groups: Record<string, { name: string }> | null) {
     getOptionalContentConfig: vi.fn().mockResolvedValue({
       getGroups: vi.fn().mockReturnValue(groups),
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any
 }
 
