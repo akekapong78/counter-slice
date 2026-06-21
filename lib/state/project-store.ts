@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Layer, ProjectState } from '@/lib/types'
+import type { Layer, ProjectState, ExtractedBlock, ColorMapping, EquipmentName } from '@/lib/types'
 
 const LAYER_COLORS = [
   '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
@@ -15,6 +15,9 @@ type Actions = {
   toggleLayerVisible: (id: string) => void
   setSelectedLayers: (ids: string[]) => void
   reset: () => void
+  setExtractBlocks: (blocks: ExtractedBlock[]) => void
+  upsertColorMapping: (mapping: ColorMapping) => void
+  upsertEquipmentName: (name: EquipmentName) => void
 }
 
 const initialState: ProjectState = {
@@ -23,6 +26,9 @@ const initialState: ProjectState = {
   pdfData: null,
   layers: [],
   selectedLayerIds: [],
+  extractBlocks: [] as ExtractedBlock[],
+  colorMappings: [] as ColorMapping[],
+  equipmentNames: [] as EquipmentName[],
 }
 
 export const useProjectStore = create<ProjectState & Actions>((set) => ({
@@ -57,6 +63,31 @@ export const useProjectStore = create<ProjectState & Actions>((set) => ({
   setSelectedLayers: (ids) => set({ selectedLayerIds: ids }),
 
   reset: () => set(initialState),
+
+  setExtractBlocks: (blocks) => set({ extractBlocks: blocks }),
+
+  upsertColorMapping: (mapping) =>
+    set((state) => {
+      const key = mapping.rgb.join(',')
+      const existing = state.colorMappings.findIndex((m) => m.rgb.join(',') === key)
+      if (existing >= 0) {
+        const updated = [...state.colorMappings]
+        updated[existing] = mapping
+        return { colorMappings: updated }
+      }
+      return { colorMappings: [...state.colorMappings, mapping] }
+    }),
+
+  upsertEquipmentName: (name) =>
+    set((state) => {
+      const existing = state.equipmentNames.findIndex((n) => n.code === name.code)
+      if (existing >= 0) {
+        const updated = [...state.equipmentNames]
+        updated[existing] = name
+        return { equipmentNames: updated }
+      }
+      return { equipmentNames: [...state.equipmentNames, name] }
+    }),
 }))
 
 export function getLayerColor(index: number): string {

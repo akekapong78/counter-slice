@@ -23,6 +23,9 @@ export type ProjectState = {
   pdfData: ArrayBuffer | null
   layers: Layer[]
   selectedLayerIds: string[]
+  extractBlocks: ExtractedBlock[]
+  colorMappings: ColorMapping[]
+  equipmentNames: EquipmentName[]
 }
 
 // --- Extract feature types ---

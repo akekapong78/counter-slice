@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+import { act } from '@testing-library/react'
 import { useProjectStore } from './project-store'
+import type { ExtractedBlock, ColorMapping, EquipmentName } from '@/lib/types'
 
 describe('project-store', () => {
   beforeEach(() => {
@@ -63,5 +65,68 @@ describe('project-store', () => {
       { id: 'b', name: 'B', source: 'zone', count: 2, visible: true, color: '#0f0' },
     ])
     expect(useProjectStore.getState().layers).toHaveLength(2)
+  })
+})
+
+describe('extract store slice', () => {
+  beforeEach(() => {
+    act(() => { useProjectStore.getState().reset() })
+  })
+
+  it('starts with empty extractBlocks', () => {
+    expect(useProjectStore.getState().extractBlocks).toEqual([])
+  })
+
+  it('setExtractBlocks replaces blocks', () => {
+    const block: ExtractedBlock = {
+      id: 'b1', poleId: 'P351', pageIndex: 0,
+      bbox: { x: 0.1, y: 0.2, width: 0.05, height: 0.03 },
+      color: [255, 0, 0], action: 'RM',
+      items: [{ code: '12-Y', action: 'RM' }],
+    }
+    act(() => { useProjectStore.getState().setExtractBlocks([block]) })
+    expect(useProjectStore.getState().extractBlocks).toHaveLength(1)
+  })
+
+  it('upsertColorMapping adds new mapping', () => {
+    const mapping: ColorMapping = { rgb: [255, 0, 0], hex: '#ff0000', label: 'RM' }
+    act(() => { useProjectStore.getState().upsertColorMapping(mapping) })
+    expect(useProjectStore.getState().colorMappings).toHaveLength(1)
+  })
+
+  it('upsertColorMapping updates existing mapping by rgb key', () => {
+    const m1: ColorMapping = { rgb: [255, 0, 0], hex: '#ff0000', label: 'RM' }
+    const m2: ColorMapping = { rgb: [255, 0, 0], hex: '#ff0000', label: 'IN' }
+    act(() => { useProjectStore.getState().upsertColorMapping(m1) })
+    act(() => { useProjectStore.getState().upsertColorMapping(m2) })
+    const mappings = useProjectStore.getState().colorMappings
+    expect(mappings).toHaveLength(1)
+    expect(mappings[0].label).toBe('IN')
+  })
+
+  it('upsertEquipmentName adds new entry', () => {
+    const name: EquipmentName = { code: '12-Y', nameTh: 'เสาคอนกรีต 12 เมตร', unit: 'ต้น' }
+    act(() => { useProjectStore.getState().upsertEquipmentName(name) })
+    expect(useProjectStore.getState().equipmentNames).toHaveLength(1)
+  })
+
+  it('upsertEquipmentName updates existing by code', () => {
+    const n1: EquipmentName = { code: '12-Y', nameTh: 'เสา', unit: 'ต้น' }
+    const n2: EquipmentName = { code: '12-Y', nameTh: 'เสาคอนกรีต 12 เมตร', unit: 'ต้น' }
+    act(() => { useProjectStore.getState().upsertEquipmentName(n1) })
+    act(() => { useProjectStore.getState().upsertEquipmentName(n2) })
+    expect(useProjectStore.getState().equipmentNames[0].nameTh).toBe('เสาคอนกรีต 12 เมตร')
+  })
+
+  it('reset clears extract state', () => {
+    act(() => {
+      useProjectStore.getState().setExtractBlocks([{
+        id: 'b1', poleId: null, pageIndex: 0,
+        bbox: { x: 0, y: 0, width: 0.1, height: 0.1 },
+        color: [0,0,0], action: 'unknown', items: [],
+      }])
+    })
+    act(() => { useProjectStore.getState().reset() })
+    expect(useProjectStore.getState().extractBlocks).toEqual([])
   })
 })
