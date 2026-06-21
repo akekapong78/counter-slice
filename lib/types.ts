@@ -24,3 +24,43 @@ export type ProjectState = {
   layers: Layer[]
   selectedLayerIds: string[]
 }
+
+// --- Extract feature types ---
+
+export type TextItem = {
+  code: string
+  action: 'RM' | 'IN' | 'RP'
+}
+
+export type RawTextBlock = {
+  rawText: string
+  x: number        // PDF units, left edge (not normalized)
+  y: number        // PDF units, baseline (not normalized)
+  pageWidth: number
+  pageHeight: number
+  pageIndex: number
+  color: [number, number, number]
+  items: TextItem[]
+}
+
+export type ExtractedBlock = {
+  id: string
+  poleId: string | null
+  pageIndex: number
+  bbox: Rect          // normalized 0–1
+  color: [number, number, number]
+  action: 'RM' | 'IN' | 'RP' | 'unknown'
+  items: TextItem[]
+}
+
+export type ColorMapping = {
+  rgb: [number, number, number]
+  hex: string
+  label: 'RM' | 'IN' | 'RP' | 'ignore'
+}
+
+export type EquipmentName = {
+  code: string
+  nameTh: string
+  unit: string
+}
