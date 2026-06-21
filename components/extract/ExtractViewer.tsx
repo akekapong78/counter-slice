@@ -79,8 +79,10 @@ export function ExtractViewer({ pdfData, pageIndex, pageCount, blocks, selectedB
     if (!containerRef.current || !canvasRef.current) return
     const cw = containerRef.current.clientWidth
     const ch = containerRef.current.clientHeight
-    const ratio = Math.min(cw / canvasRef.current.width, ch / canvasRef.current.height)
-    setScale((s) => s * ratio)
+    const canvas = canvasRef.current
+    if (!canvas.width || !canvas.height) return
+    const ratio = Math.min(cw / canvas.width, ch / canvas.height)
+    setScale(Math.min(MAX_SCALE, Math.max(MIN_SCALE, ratio)))
     setOffset({ x: 0, y: 0 })
   }, [])
 
