@@ -22,6 +22,10 @@ const SET_FILL_RGB = 58
 const SET_TEXT_MATRIX = 70
 const SHOW_TEXT = 43
 
+// Helper: wrap glyphs in an extra array layer for testing.
+// NOTE: This double-array wrapping is a MOCK ARTIFACT, not how real PDF.js works.
+// Real PDF.js SHOW_TEXT args[0] is [glyph, ...]; our mock wraps it one level deeper
+// to test the unwrapping logic in collectSegments().
 function glyphArgs(str: string) {
   return [str.split('').map((c) => ({ unicode: c }))]
 }

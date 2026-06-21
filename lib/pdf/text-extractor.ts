@@ -6,8 +6,7 @@ const SET_TEXT_MATRIX = 70
 const SHOW_TEXT = 43
 const SHOW_SPACED_TEXT = 44
 
-// Y proximity to merge glyphs into same line; X proximity to merge lines into block
-const LINE_Y_THRESHOLD = 8
+// Y proximity to merge lines into block
 const BLOCK_Y_GAP = 40
 
 type GlyphSegment = {
@@ -130,7 +129,7 @@ function pushBlock(
 export async function detectExtractMode(page: PDFPageProxy): Promise<boolean> {
   const segments = await collectSegments(page)
   const allText = segments.map((s) => s.text).join('')
-  return /\[RM\]|\[IN\]|\(RM\)|\(IN\)/.test(allText)
+  return /\[RM\]|\[IN\]|\[RP\]|\(RM\)|\(IN\)|\(RP\)/.test(allText)
 }
 
 export async function extractTextBlocks(
