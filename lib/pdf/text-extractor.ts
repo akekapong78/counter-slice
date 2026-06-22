@@ -1,5 +1,5 @@
-import type { PDFPageProxy } from 'pdfjs-dist'
-import type { TextItem, RawTextBlock } from '@/lib/types'
+import type { PDFPageProxy, PDFDocumentProxy } from 'pdfjs-dist'
+import type { TextItem, RawTextBlock, ItemCounts } from '@/lib/types'
 
 const SET_FILL_RGB = 58
 const SET_TEXT_MATRIX = 70
@@ -143,4 +143,21 @@ export async function extractTextBlocks(
   const viewport = page.getViewport({ scale: 1 })
   const segments = await collectSegments(page)
   return clusterIntoBlocks(segments, viewport.width, viewport.height, pageIndex)
+}
+
+export async function scanAllItems(
+  doc: PDFDocumentProxy
+): Promise<Record<string, ItemCounts>> {
+  const counts: Record<string, ItemCounts> = {}
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i)
+    const segments = await collectSegments(page)
+    const text = segments.map((s) => s.text).join('')
+    const items = parseItems(text)
+    for (const item of items) {
+      if (!counts[item.code]) counts[item.code] = { IN: 0, RM: 0, RP: 0 }
+      counts[item.code][item.action]++
+    }
+  }
+  return counts
 }

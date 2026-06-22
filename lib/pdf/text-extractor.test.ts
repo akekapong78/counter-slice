@@ -1,7 +1,7 @@
 // lib/pdf/text-extractor.test.ts
 import { describe, it, expect } from 'vitest'
-import { parseItems, detectExtractMode, extractTextBlocks } from './text-extractor'
-import type { PDFPageProxy } from 'pdfjs-dist'
+import { parseItems, detectExtractMode, extractTextBlocks, scanAllItems } from './text-extractor'
+import type { PDFPageProxy, PDFDocumentProxy } from 'pdfjs-dist'
 
 // Helper: build a mock PDFPageProxy from operator arrays
 function mockPage(
@@ -126,5 +126,53 @@ describe('extractTextBlocks', () => {
     ])
     const blocks = await extractTextBlocks(page, 0)
     expect(blocks.length).toBe(2)
+  })
+})
+
+function mockDoc(pages: ReturnType<typeof mockPage>[]): PDFDocumentProxy {
+  return {
+    numPages: pages.length,
+    getPage: async (n: number) => pages[n - 1],
+  } as unknown as PDFDocumentProxy
+}
+
+describe('scanAllItems', () => {
+  it('counts IN items across all pages from text suffix', async () => {
+    const page1 = mockPage([
+      { fn: SET_FILL_RGB, args: [new Uint8ClampedArray([0, 0, 255])] },
+      { fn: SET_TEXT_MATRIX, args: [1, 0, 0, 1, 100, 400] },
+      { fn: SHOW_TEXT, args: [glyphArgs('ST-COM(IN)CCB[IN]')] },
+    ])
+    const page2 = mockPage([
+      { fn: SET_FILL_RGB, args: [new Uint8ClampedArray([0, 0, 255])] },
+      { fn: SET_TEXT_MATRIX, args: [1, 0, 0, 1, 100, 400] },
+      { fn: SHOW_TEXT, args: [glyphArgs('ST-COM(IN)')] },
+    ])
+    const doc = mockDoc([page1, page2])
+    const counts = await scanAllItems(doc)
+    expect(counts['ST-COM']).toEqual({ IN: 2, RM: 0, RP: 0 })
+    expect(counts['CCB']).toEqual({ IN: 1, RM: 0, RP: 0 })
+  })
+
+  it('counts RM items from text suffix regardless of color', async () => {
+    const page = mockPage([
+      { fn: SET_FILL_RGB, args: [new Uint8ClampedArray([255, 0, 0])] },
+      { fn: SET_TEXT_MATRIX, args: [1, 0, 0, 1, 100, 400] },
+      { fn: SHOW_TEXT, args: [glyphArgs('12-Y[RM]OHGW[RM]')] },
+    ])
+    const doc = mockDoc([page])
+    const counts = await scanAllItems(doc)
+    expect(counts['12-Y']).toEqual({ IN: 0, RM: 1, RP: 0 })
+    expect(counts['OHGW']).toEqual({ IN: 0, RM: 1, RP: 0 })
+  })
+
+  it('returns empty record when no tagged items exist', async () => {
+    const page = mockPage([
+      { fn: SET_TEXT_MATRIX, args: [1, 0, 0, 1, 100, 400] },
+      { fn: SHOW_TEXT, args: [glyphArgs('แบบเลขที่')] },
+    ])
+    const doc = mockDoc([page])
+    const counts = await scanAllItems(doc)
+    expect(counts).toEqual({})
   })
 })
