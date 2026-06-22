@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Layer, ProjectState, ExtractedBlock, ColorMapping, EquipmentName } from '@/lib/types'
+import type { Layer, ProjectState, ExtractedBlock, ColorMapping, EquipmentName, ItemCounts } from '@/lib/types'
 
 const LAYER_COLORS = [
   '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
@@ -18,6 +18,8 @@ type Actions = {
   setExtractBlocks: (blocks: ExtractedBlock[]) => void
   upsertColorMapping: (mapping: ColorMapping) => void
   upsertEquipmentName: (name: EquipmentName) => void
+  setExtractItemCounts: (counts: Record<string, ItemCounts>) => void
+  loadCatalog: () => Promise<void>
 }
 
 const initialState: ProjectState = {
@@ -29,9 +31,10 @@ const initialState: ProjectState = {
   extractBlocks: [] as ExtractedBlock[],
   colorMappings: [] as ColorMapping[],
   equipmentNames: [] as EquipmentName[],
+  extractItemCounts: {} as Record<string, ItemCounts>,
 }
 
-export const useProjectStore = create<ProjectState & Actions>((set) => ({
+export const useProjectStore = create<ProjectState & Actions>((set, get) => ({
   ...initialState,
 
   setFile: (fileName, pageCount, pdfData) =>
@@ -88,6 +91,25 @@ export const useProjectStore = create<ProjectState & Actions>((set) => ({
       }
       return { equipmentNames: [...state.equipmentNames, name] }
     }),
+
+  setExtractItemCounts: (counts) => set({ extractItemCounts: counts }),
+
+  loadCatalog: async () => {
+    try {
+      const res = await fetch('/equipment-catalog.json')
+      if (!res.ok) return
+      const catalog: Record<string, Omit<EquipmentName, 'code'>> = await res.json()
+      set((state) => {
+        const userCodes = new Set(state.equipmentNames.map((n) => n.code))
+        const defaults: EquipmentName[] = Object.entries(catalog)
+          .filter(([code]) => !userCodes.has(code))
+          .map(([code, meta]) => ({ code, ...meta }))
+        return { equipmentNames: [...state.equipmentNames, ...defaults] }
+      })
+    } catch {
+      // catalog load is best-effort
+    }
+  },
 }))
 
 export function getLayerColor(index: number): string {

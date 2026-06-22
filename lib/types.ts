@@ -26,9 +26,12 @@ export type ProjectState = {
   extractBlocks: ExtractedBlock[]
   colorMappings: ColorMapping[]
   equipmentNames: EquipmentName[]
+  extractItemCounts: Record<string, ItemCounts>
 }
 
 // --- Extract feature types ---
+
+export type ItemCounts = { IN: number; RM: number; RP: number }
 
 export type TextItem = {
   code: string
@@ -66,6 +69,8 @@ export type ColorMapping = {
 
 export type EquipmentName = {
   code: string
+  catalogCode?: string
+  nameEn?: string
   nameTh: string
   unit: string
 }
