@@ -25,7 +25,7 @@ function downloadCsv(content: string, name: string) {
 }
 
 export function ResultsPanel({ onSelectBlock, fileName }: Props) {
-  const { extractBlocks, equipmentNames, colorMappings } = useProjectStore()
+  const { extractBlocks, equipmentNames, colorMappings, extractItemCounts } = useProjectStore()
   const [filter, setFilter] = useState<FilterAction>('all')
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState<'detail' | 'summary'>('detail')
@@ -53,18 +53,11 @@ export function ResultsPanel({ onSelectBlock, fileName }: Props) {
     return true
   })
 
-  // Summary: aggregate by code using block.action (authoritative)
+  // Summary: read pre-computed counts from store (populated by scanAllItems)
   const summary = useMemo(() => {
-    const map = new Map<string, { RM: number; IN: number; RP: number }>()
-    for (const b of resolvedBlocks) {
-      if (b.action !== 'RM' && b.action !== 'IN' && b.action !== 'RP') continue
-      for (const item of b.items) {
-        if (!map.has(item.code)) map.set(item.code, { RM: 0, IN: 0, RP: 0 })
-        map.get(item.code)![b.action]++
-      }
-    }
-    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b))
-  }, [resolvedBlocks])
+    return Object.entries(extractItemCounts)
+      .sort(([a], [b]) => a.localeCompare(b))
+  }, [extractItemCounts])
 
   const nameMap = useMemo(() =>
     new Map(equipmentNames.map((n) => [n.code, n])), [equipmentNames])
@@ -151,7 +144,7 @@ export function ResultsPanel({ onSelectBlock, fileName }: Props) {
           <table className="text-xs w-full">
             <thead className="sticky top-0 bg-surface border-b border-outline-variant">
               <tr>
-                {['Code', 'Thai Name', 'Unit', 'RM', 'IN', 'RP'].map((h) => (
+                {['Code', 'Cat.Code', 'English Name', 'Thai Name', 'Unit', 'RM', 'IN', 'RP'].map((h) => (
                   <th key={h} className="text-left px-3 py-2 text-on-surface-variant">{h}</th>
                 ))}
               </tr>
@@ -162,6 +155,8 @@ export function ResultsPanel({ onSelectBlock, fileName }: Props) {
                 return (
                   <tr key={code} className="border-b border-outline-variant/40 hover:bg-surface-container-low">
                     <td className="px-3 py-1.5 font-mono">{code}</td>
+                    <td className="px-3 py-1.5 font-mono text-[10px] text-on-surface-variant">{entry?.catalogCode ?? ''}</td>
+                    <td className="px-3 py-1.5 text-[10px] text-on-surface-variant max-w-[140px] truncate" title={entry?.nameEn ?? ''}>{entry?.nameEn ?? ''}</td>
                     <td className="px-3 py-1.5 text-on-surface-variant">{entry?.nameTh ?? ''}</td>
                     <td className="px-3 py-1.5 text-on-surface-variant">{entry?.unit ?? ''}</td>
                     <td className="px-3 py-1.5 text-red-600 font-medium">{counts.RM || ''}</td>
