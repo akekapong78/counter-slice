@@ -34,3 +34,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# superpowers
+.superpowers/
+
+# example data (real PDFs, not source)
+example_data/
+
+# scratch test scripts
+test-*.js
