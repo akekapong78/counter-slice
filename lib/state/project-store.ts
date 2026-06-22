@@ -38,7 +38,7 @@ export const useProjectStore = create<ProjectState & Actions>((set, get) => ({
   ...initialState,
 
   setFile: (fileName, pageCount, pdfData) =>
-    set({ fileName, pageCount, pdfData, layers: [], selectedLayerIds: [] }),
+    set({ fileName, pageCount, pdfData, layers: [], selectedLayerIds: [], extractBlocks: [], colorMappings: [], extractItemCounts: {} }),
 
   setLayers: (layers) => set({ layers }),
 

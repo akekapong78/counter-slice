@@ -44,6 +44,7 @@ export function ExtractViewer({ pdfData, pageIndex, pageCount, blocks, selectedB
         }
       })
       // Scan all pages for equipment counts
+      // onScanComplete is setExtractItemCounts (Zustand action) — stable reference, safe as dep
       if (onScanComplete) {
         scanAllItems(doc).then(onScanComplete)
       }
