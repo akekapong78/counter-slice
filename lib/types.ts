@@ -39,6 +39,8 @@ export type RawTextBlock = {
   rawText: string
   x: number        // PDF units, left edge (not normalized)
   y: number        // PDF units, baseline (not normalized)
+  width: number    // PDF units, span of block
+  height: number   // PDF units, span of block
   pageWidth: number
   pageHeight: number
   pageIndex: number

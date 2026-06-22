@@ -113,6 +113,10 @@ function pushBlock(
   const ys = segs.map((s) => s.y)
   const x = Math.min(...xs)
   const y = Math.min(...ys)
+  const maxX = Math.max(...xs)
+  const maxY = Math.max(...ys)
+  const width = maxX - x + 10   // +10 for approximate glyph width
+  const height = maxY - y + 10  // +10 for approximate glyph height
   // Dominant color = most frequent
   const colorKey = (c: [number, number, number]) => c.join(',')
   const freq: Record<string, { color: [number, number, number]; count: number }> = {}
@@ -123,7 +127,7 @@ function pushBlock(
   }
   const dominant = Object.values(freq).sort((a, b) => b.count - a.count)[0].color
 
-  out.push({ rawText, x, y, pageWidth, pageHeight, pageIndex, color: dominant, items })
+  out.push({ rawText, x, y, width, height, pageWidth, pageHeight, pageIndex, color: dominant, items })
 }
 
 export async function detectExtractMode(page: PDFPageProxy): Promise<boolean> {

@@ -16,7 +16,11 @@ function downloadCsv(content: string, name: string) {
   const blob = new Blob(['﻿' + content], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  a.href = url; a.download = name; a.click()
+  a.href = url
+  a.download = name
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
   URL.revokeObjectURL(url)
 }
 
@@ -34,10 +38,13 @@ export function ResultsPanel({ onSelectBlock, fileName }: Props) {
   }, [colorMappings])
 
   const resolvedBlocks = useMemo(() =>
-    extractBlocks.map((b) => ({
-      ...b,
-      action: (mappingMap.get(b.color.join(',')) ?? 'unknown') as typeof b.action,
-    })), [extractBlocks, mappingMap])
+    extractBlocks.map((b) => {
+      const label = mappingMap.get(b.color.join(',')) ?? 'unknown'
+      return {
+        ...b,
+        action: (label === 'ignore' ? 'unknown' : label) as typeof b.action,
+      }
+    }), [extractBlocks, mappingMap])
 
   const filtered = resolvedBlocks.filter((b) => {
     if (filter !== 'all' && b.action !== filter) return false
@@ -46,16 +53,14 @@ export function ResultsPanel({ onSelectBlock, fileName }: Props) {
     return true
   })
 
-  // Summary: aggregate by code
+  // Summary: aggregate by code using block.action (authoritative)
   const summary = useMemo(() => {
     const map = new Map<string, { RM: number; IN: number; RP: number }>()
     for (const b of resolvedBlocks) {
+      if (b.action !== 'RM' && b.action !== 'IN' && b.action !== 'RP') continue
       for (const item of b.items) {
         if (!map.has(item.code)) map.set(item.code, { RM: 0, IN: 0, RP: 0 })
-        const entry = map.get(item.code)!
-        if (item.action === 'RM' || item.action === 'IN' || item.action === 'RP') {
-          entry[item.action]++
-        }
+        map.get(item.code)![b.action]++
       }
     }
     return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b))

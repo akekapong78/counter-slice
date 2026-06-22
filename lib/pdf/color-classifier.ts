@@ -64,7 +64,12 @@ export function resolveBlocks(
     // Normalize bbox: PDF y is bottom-up → flip to top-down
     const bboxX = block.x / block.pageWidth
     const bboxY = 1 - block.y / block.pageHeight
-    const bbox: Rect = { x: bboxX, y: bboxY, width: 0.08, height: 0.04 }
+    const bbox: Rect = {
+      x: bboxX,
+      y: bboxY,
+      width: block.width / block.pageWidth,
+      height: block.height / block.pageHeight,
+    }
 
     return {
       id: `block-${block.pageIndex}-${i}`,

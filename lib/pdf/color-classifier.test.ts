@@ -6,6 +6,7 @@ function makeBlock(color: [number, number, number], overrides: Partial<RawTextBl
   return {
     rawText: '12-Y[RM]',
     x: 100, y: 400,
+    width: 80, height: 40,
     pageWidth: 1000, pageHeight: 800,
     pageIndex: 0,
     color,
@@ -77,6 +78,7 @@ describe('resolveBlocks', () => {
     const poleBlock: RawTextBlock = {
       rawText: 'P351',
       x: 100, y: 420,
+      width: 40, height: 10,
       pageWidth: 1000, pageHeight: 800,
       pageIndex: 0,
       color: [0, 63, 255],

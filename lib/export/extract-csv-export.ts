@@ -27,7 +27,7 @@ export function exportExtractCsvDetail(
       lines.push(row([
         String(block.pageIndex + 1),
         block.poleId ?? '',
-        item.action,
+        block.action,
         item.code,
         entry?.nameTh ?? '',
         entry?.unit ?? '',
@@ -45,9 +45,10 @@ export function exportExtractCsvSummary(
   const counts = new Map<string, { RM: number; IN: number; RP: number }>()
 
   for (const block of blocks) {
+    if (block.action === 'unknown') continue
     for (const item of block.items) {
       if (!counts.has(item.code)) counts.set(item.code, { RM: 0, IN: 0, RP: 0 })
-      counts.get(item.code)![item.action]++
+      counts.get(item.code)![block.action]++
     }
   }
 
