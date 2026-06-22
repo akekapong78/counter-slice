@@ -12,11 +12,12 @@ import { ResultsPanel } from '@/components/extract/ResultsPanel'
 
 export default function ExtractPage() {
   const router = useRouter()
-  const { pdfData, fileName, pageCount, extractBlocks } = useProjectStore()
+  const { pdfData, fileName, pageCount, extractBlocks, setExtractItemCounts, loadCatalog } = useProjectStore()
   const [pageIndex, setPageIndex] = useState(0)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
 
   useEffect(() => { setupPdfWorker() }, [])
+  useEffect(() => { void loadCatalog() }, [loadCatalog])
   useEffect(() => { if (!pdfData) router.push('/') }, [pdfData, router])
 
   if (!pdfData) return null
@@ -53,6 +54,7 @@ export default function ExtractPage() {
               blocks={extractBlocks}
               selectedBlockId={selectedBlockId}
               onPageChange={setPageIndex}
+              onScanComplete={setExtractItemCounts}
             />
           </div>
 

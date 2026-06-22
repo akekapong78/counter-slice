@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { pdfjs } from '@/lib/pdf/pdfjs-setup'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
-import type { ExtractedBlock } from '@/lib/types'
+import type { ExtractedBlock, ItemCounts } from '@/lib/types'
+import { scanAllItems } from '@/lib/pdf/text-extractor'
 
 type Props = {
   pdfData: ArrayBuffer
@@ -12,12 +13,13 @@ type Props = {
   blocks: ExtractedBlock[]
   selectedBlockId: string | null
   onPageChange: (index: number) => void
+  onScanComplete?: (counts: Record<string, ItemCounts>) => void
 }
 
 const MIN_SCALE = 0.3
 const MAX_SCALE = 5
 
-export function ExtractViewer({ pdfData, pageIndex, pageCount, blocks, selectedBlockId, onPageChange }: Props) {
+export function ExtractViewer({ pdfData, pageIndex, pageCount, blocks, selectedBlockId, onPageChange, onScanComplete }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -27,12 +29,26 @@ export function ExtractViewer({ pdfData, pageIndex, pageCount, blocks, selectedB
   const [isPanning, setIsPanning] = useState(false)
   const panStart = useRef({ x: 0, y: 0, ox: 0, oy: 0 })
 
-  // Load PDF once
+  // Load PDF once, then auto-fit to container
   useEffect(() => {
     pdfjs.getDocument({ data: pdfData.slice(0) }).promise.then((doc) => {
       pdfDocRef.current = doc
+      doc.getPage(1).then((page) => {
+        const vp = page.getViewport({ scale: 1 })
+        if (containerRef.current) {
+          const cw = containerRef.current.clientWidth
+          const ch = containerRef.current.clientHeight
+          const ratio = Math.min(cw / vp.width, ch / vp.height) * 0.95
+          setScale(Math.min(MAX_SCALE, Math.max(MIN_SCALE, ratio)))
+          setOffset({ x: 0, y: 0 })
+        }
+      })
+      // Scan all pages for equipment counts
+      if (onScanComplete) {
+        scanAllItems(doc).then(onScanComplete)
+      }
     })
-  }, [pdfData])
+  }, [pdfData, onScanComplete])
 
   // Render page on scale/page change
   useEffect(() => {
@@ -105,14 +121,14 @@ export function ExtractViewer({ pdfData, pageIndex, pageCount, blocks, selectedB
       {/* Canvas area */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-hidden relative bg-surface-dim/30 cursor-grab active:cursor-grabbing"
+        className="flex-1 overflow-hidden relative bg-surface-dim/30 cursor-grab active:cursor-grabbing flex items-center justify-center"
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseUp}
         onWheel={onWheel}
       >
-        <div style={{ transform: `translate(${offset.x}px, ${offset.y}px)`, display: 'inline-block' }}>
+        <div style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}>
           <div className="relative">
             <canvas ref={canvasRef} className="shadow-xl" />
             <svg
