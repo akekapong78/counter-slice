@@ -1,0 +1,170 @@
+{
+  "12": {
+    "catalogCode": "1000010004",
+    "nameEn": "POLE,CONCRETE, 12 M.LONG",
+    "nameTh": "เสาคอนกรีต 12 ม.",
+    "unit": "ต้น"
+  },
+  "14": {
+    "catalogCode": "1000010006",
+    "nameEn": "POLE,CONCRETE, 14 M. LONG",
+    "nameTh": "เสาคอนกรีต 14 ม.",
+    "unit": "ต้น"
+  },
+  "12.2": {
+    "catalogCode": "1000010012",
+    "nameEn": "POLE,CONCRETE, 12.20 M. LONG",
+    "nameTh": "เสาคอนกรีต 12.20 ม.",
+    "unit": "ต้น"
+  },
+  "12.2-Y": {
+    "catalogCode": "1000010012",
+    "nameEn": "POLE,CONCRETE, 12.20 M. LONG (Y-branch)",
+    "nameTh": "เสาคอนกรีต 12.20 ม. (แยก Y)",
+    "unit": "ต้น"
+  },
+  "9": {
+    "catalogCode": "",
+    "nameEn": "POLE (9 M.)",
+    "nameTh": "เสา 9 ม.",
+    "unit": "ต้น"
+  },
+  "ST-COM": {
+    "catalogCode": "1000110002",
+    "nameEn": "CROSSARM,PRESTRESSED CONCRETE,SPUN,H.T. 120X120X3,000 MM.",
+    "nameTh": "คอนคอนกรีตอัดแรง",
+    "unit": "ชิ้น"
+  },
+  "DDE": {
+    "catalogCode": "1000110004",
+    "nameEn": "CROSSARM,PRESTRESSED CONCRETE,SPUN(FOR DEAD-ENDING) 120X120X2,500 MM.",
+    "nameTh": "คอน Dead End",
+    "unit": "ชิ้น"
+  },
+  "BA": {
+    "catalogCode": "1010010003",
+    "nameEn": "STEEL ANGLE,OVERHEAD GROUND WIRE BAYONET 65x65x6 MM. 2,250 MM. LONG",
+    "nameTh": "เหล็กฉาก Bayonet OHGW",
+    "unit": "ชิ้น"
+  },
+  "OHGW": {
+    "catalogCode": "1010100002",
+    "nameEn": "WIRE,STEEL STRANDED 25 sq.mm.TIS.404",
+    "nameTh": "สายดินอากาศ (OHGW) 25 ตร.มม.",
+    "unit": "ม."
+  },
+  "GY-32": {
+    "catalogCode": "1010100004",
+    "nameEn": "WIRE,STEEL STRANDED 50/7 sq.mm.TIS.404",
+    "nameTh": "สายเหล็กตีเกลียว 50/7 ตร.มม.",
+    "unit": "ม."
+  },
+  "GY-02": {
+    "catalogCode": "1010100006",
+    "nameEn": "WIRE,STEEL STRANDED 95 sq.mm.TIS.404",
+    "nameTh": "สายเหล็กตีเกลียว 95 ตร.มม.",
+    "unit": "ม."
+  },
+  "SP": {
+    "catalogCode": "",
+    "nameEn": "GUY WIRE SUPPORT (SP)",
+    "nameTh": "อุปกรณ์ยึดโยง SP",
+    "unit": "ชุด"
+  },
+  "CCB": {
+    "catalogCode": "1020440100",
+    "nameEn": "CLAMP,CABLE SUSPENSION",
+    "nameTh": "แคลมป์แขวนสาย",
+    "unit": "ชิ้น"
+  },
+  "DE": {
+    "catalogCode": "1020250221",
+    "nameEn": "PREFORMED DEAD END,FOR AL PARTIALLY INSULATED CONDUCTOR 33 KV.185 SQ.MM.",
+    "nameTh": "Dead End สาย 185 ตร.มม.",
+    "unit": "ชุด"
+  },
+  "LA-2": {
+    "catalogCode": "1040000100",
+    "nameEn": "S.A. 30 KV. 5 KA.",
+    "nameTh": "สายล่อฟ้า 30 kV 5 kA",
+    "unit": "ชุด"
+  },
+  "LA-3": {
+    "catalogCode": "1040000100",
+    "nameEn": "S.A. 30 KV. 5 KA.",
+    "nameTh": "สายล่อฟ้า 30 kV 5 kA",
+    "unit": "ชุด"
+  },
+  "LA-6": {
+    "catalogCode": "1040000100",
+    "nameEn": "S.A. 30 KV. 5 KA.",
+    "nameTh": "สายล่อฟ้า 30 kV 5 kA",
+    "unit": "ชุด"
+  },
+  "MV GR-02": {
+    "catalogCode": "30523",
+    "nameEn": "HV.GROUNDING GR-2 (ASSEMBLY NO.9706, 9701B)",
+    "nameTh": "สายดิน MV GR-02",
+    "unit": "ชุด"
+  },
+  "GR-02": {
+    "catalogCode": "30523",
+    "nameEn": "HV.GROUNDING GR-2",
+    "nameTh": "สายดิน GR-02",
+    "unit": "ชุด"
+  },
+  "TR-202": {
+    "catalogCode": "1040080305",
+    "nameEn": "TRANSFORMER,0.5 KVA.,1 PHASE 19 KV.FOR POWER SUPPLY OF ELECTRONIC RECLOSER",
+    "nameTh": "หม้อแปลง TR-202",
+    "unit": "ชุด"
+  },
+  "R4": {
+    "catalogCode": "",
+    "nameEn": "RECLOSER / EQUIPMENT R4",
+    "nameTh": "อุปกรณ์ R4",
+    "unit": "ชุด"
+  },
+  "R2": {
+    "catalogCode": "",
+    "nameEn": "RECLOSER / EQUIPMENT R2",
+    "nameTh": "อุปกรณ์ R2",
+    "unit": "ชุด"
+  },
+  "R9": {
+    "catalogCode": "",
+    "nameEn": "RECLOSER / EQUIPMENT R9",
+    "nameTh": "อุปกรณ์ R9",
+    "unit": "ชุด"
+  },
+  "D/F": {
+    "catalogCode": "",
+    "nameEn": "COVER D/F",
+    "nameTh": "ฝาครอบ D/F",
+    "unit": "ชิ้น"
+  },
+  "BA.AL": {
+    "catalogCode": "",
+    "nameEn": "BAYONET ARM ALUMINIUM",
+    "nameTh": "Bayonet อะลูมิเนียม",
+    "unit": "ชิ้น"
+  },
+  "FSD-3": {
+    "catalogCode": "",
+    "nameEn": "FUSE DISCONNECT SWITCH 3-PHASE",
+    "nameTh": "สวิตช์ฟิวส์ 3 เฟส",
+    "unit": "ชุด"
+  },
+  "FSD-6": {
+    "catalogCode": "",
+    "nameEn": "FUSE DISCONNECT SWITCH 6-PHASE",
+    "nameTh": "สวิตช์ฟิวส์ 6 เฟส",
+    "unit": "ชุด"
+  },
+  "DE.BL": {
+    "catalogCode": "",
+    "nameEn": "DEAD END BLOCK",
+    "nameTh": "Dead End Block",
+    "unit": "ชุด"
+  }
+}
