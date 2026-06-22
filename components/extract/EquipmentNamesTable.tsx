@@ -5,14 +5,12 @@ import { useProjectStore } from '@/lib/state/project-store'
 export function EquipmentNamesTable() {
   const { equipmentNames, extractBlocks, upsertEquipmentName } = useProjectStore()
 
-  // Collect all unique codes from blocks
   const allCodes = Array.from(
     new Set(extractBlocks.flatMap((b) => b.items.map((i) => i.code)))
   ).sort()
 
-  // Ensure all codes have an entry (add empty ones)
   const nameMap = new Map(equipmentNames.map((n) => [n.code, n]))
-  const rows = allCodes.map((code) => nameMap.get(code) ?? { code, nameTh: '', unit: '' })
+  const rows = allCodes.map((code) => nameMap.get(code) ?? { code, catalogCode: '', nameEn: '', nameTh: '', unit: '' })
 
   if (rows.length === 0) return null
 
@@ -24,14 +22,18 @@ export function EquipmentNamesTable() {
           <thead>
             <tr className="text-on-surface-variant border-b border-outline-variant">
               <th className="text-left py-1 pr-2">Code</th>
+              <th className="text-left py-1 pr-2">Cat.Code</th>
+              <th className="text-left py-1 pr-2">English Name</th>
               <th className="text-left py-1 pr-2">Thai Name</th>
               <th className="text-left py-1">Unit</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.code} className={`border-b border-outline-variant/40 ${row.nameTh === '' ? 'bg-yellow-50' : ''}`}>
+              <tr key={row.code} className={`border-b border-outline-variant/40 ${!row.nameTh ? 'bg-yellow-50' : ''}`}>
                 <td className="py-1 pr-2 font-mono text-on-surface">{row.code}</td>
+                <td className="py-1 pr-2 font-mono text-on-surface-variant text-[10px]">{row.catalogCode ?? ''}</td>
+                <td className="py-1 pr-2 text-on-surface-variant text-[10px] max-w-[120px] truncate" title={row.nameEn ?? ''}>{row.nameEn ?? ''}</td>
                 <td className="py-1 pr-2">
                   <input
                     value={row.nameTh}
@@ -45,7 +47,7 @@ export function EquipmentNamesTable() {
                     value={row.unit}
                     onChange={(e) => upsertEquipmentName({ ...row, unit: e.target.value })}
                     placeholder="หน่วย"
-                    className="w-20 bg-transparent border-b border-outline-variant/50 focus:border-primary outline-none text-xs"
+                    className="w-16 bg-transparent border-b border-outline-variant/50 focus:border-primary outline-none text-xs"
                   />
                 </td>
               </tr>
