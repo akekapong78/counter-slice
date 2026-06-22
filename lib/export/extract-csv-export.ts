@@ -1,4 +1,4 @@
-import type { ExtractedBlock, EquipmentName } from '@/lib/types'
+import type { ExtractedBlock, EquipmentName, ItemCounts } from '@/lib/types'
 
 function escapeCell(val: string): string {
   if (val.includes('"') || val.includes(',') || val.includes('\n')) {
@@ -20,7 +20,7 @@ export function exportExtractCsvDetail(
   names: EquipmentName[]
 ): string {
   const lookup = nameMap(names)
-  const lines = ['page,poleId,action,code,nameTh,unit']
+  const lines = ['page,poleId,action,code,catalogCode,nameEn,nameTh,unit']
   for (const block of blocks) {
     for (const item of block.items) {
       const entry = lookup.get(item.code)
@@ -29,6 +29,8 @@ export function exportExtractCsvDetail(
         block.poleId ?? '',
         block.action,
         item.code,
+        entry?.catalogCode ?? '',
+        entry?.nameEn ?? '',
         entry?.nameTh ?? '',
         entry?.unit ?? '',
       ]))
@@ -38,24 +40,23 @@ export function exportExtractCsvDetail(
 }
 
 export function exportExtractCsvSummary(
-  blocks: ExtractedBlock[],
+  counts: Record<string, ItemCounts>,
   names: EquipmentName[]
 ): string {
   const lookup = nameMap(names)
-  const counts = new Map<string, { RM: number; IN: number; RP: number }>()
-
-  for (const block of blocks) {
-    if (block.action === 'unknown') continue
-    for (const item of block.items) {
-      if (!counts.has(item.code)) counts.set(item.code, { RM: 0, IN: 0, RP: 0 })
-      counts.get(item.code)![block.action]++
-    }
-  }
-
-  const lines = ['code,nameTh,unit,RM,IN,RP']
-  for (const [code, c] of Array.from(counts.entries()).sort()) {
+  const lines = ['code,catalogCode,nameEn,nameTh,unit,RM,IN,RP']
+  for (const [code, c] of Object.entries(counts).sort(([a], [b]) => a.localeCompare(b))) {
     const entry = lookup.get(code)
-    lines.push(row([code, entry?.nameTh ?? '', entry?.unit ?? '', String(c.RM), String(c.IN), String(c.RP)]))
+    lines.push(row([
+      code,
+      entry?.catalogCode ?? '',
+      entry?.nameEn ?? '',
+      entry?.nameTh ?? '',
+      entry?.unit ?? '',
+      String(c.RM),
+      String(c.IN),
+      String(c.RP),
+    ]))
   }
   return lines.join('\n')
 }

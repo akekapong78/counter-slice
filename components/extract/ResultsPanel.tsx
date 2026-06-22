@@ -177,11 +177,11 @@ export function ResultsPanel({ onSelectBlock, fileName }: Props) {
           className="flex-1 text-xs bg-surface border border-outline-variant rounded py-1.5 hover:bg-surface-container-low"
         >Detail CSV</button>
         <button
-          onClick={() => downloadCsv(exportExtractCsvSummary(resolvedBlocks, equipmentNames), `${fileName}-summary.csv`)}
+          onClick={() => downloadCsv(exportExtractCsvSummary(extractItemCounts, equipmentNames), `${fileName}-summary.csv`)}
           className="flex-1 text-xs bg-surface border border-outline-variant rounded py-1.5 hover:bg-surface-container-low"
         >Summary CSV</button>
         <button
-          onClick={() => exportExtractExcel(resolvedBlocks, equipmentNames, fileName)}
+          onClick={() => exportExtractExcel(resolvedBlocks, equipmentNames, extractItemCounts, fileName)}
           className="flex-1 text-xs bg-primary text-white rounded py-1.5 hover:bg-primary-container"
         >Excel</button>
       </div>

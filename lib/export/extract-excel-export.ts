@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx'
-import type { ExtractedBlock, EquipmentName } from '@/lib/types'
+import type { ExtractedBlock, EquipmentName, ItemCounts } from '@/lib/types'
 import { exportExtractCsvDetail, exportExtractCsvSummary } from './extract-csv-export'
 
 function csvToSheet(csv: string): XLSX.WorkSheet {
@@ -12,10 +12,11 @@ function csvToSheet(csv: string): XLSX.WorkSheet {
 export function exportExtractExcel(
   blocks: ExtractedBlock[],
   names: EquipmentName[],
+  counts: Record<string, ItemCounts>,
   fileName: string
 ): void {
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, csvToSheet(exportExtractCsvDetail(blocks, names)), 'Detail')
-  XLSX.utils.book_append_sheet(wb, csvToSheet(exportExtractCsvSummary(blocks, names)), 'Summary')
+  XLSX.utils.book_append_sheet(wb, csvToSheet(exportExtractCsvSummary(counts, names)), 'Summary')
   XLSX.writeFile(wb, `${fileName}-extract.xlsx`)
 }
