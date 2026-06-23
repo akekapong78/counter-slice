@@ -18,9 +18,9 @@ function mockPage(
   } as unknown as PDFPageProxy
 }
 
-const SET_FILL_RGB = 58
-const SET_TEXT_MATRIX = 70
-const SHOW_TEXT = 43
+const SET_FILL_RGB = 59
+const SET_TEXT_MATRIX = 42
+const SHOW_TEXT = 44
 
 // Helper: wrap glyphs in an extra array layer for testing.
 // NOTE: This double-array wrapping is a MOCK ARTIFACT, not how real PDF.js works.

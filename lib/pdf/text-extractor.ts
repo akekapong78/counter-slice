@@ -1,10 +1,10 @@
 import type { PDFPageProxy, PDFDocumentProxy } from 'pdfjs-dist'
 import type { TextItem, RawTextBlock, ItemCounts } from '@/lib/types'
 
-const SET_FILL_RGB = 58
-const SET_TEXT_MATRIX = 70
-const SHOW_TEXT = 43
-const SHOW_SPACED_TEXT = 44
+const SET_FILL_RGB = 59
+const SET_TEXT_MATRIX = 42
+const SHOW_TEXT = 44
+const SHOW_SPACED_TEXT = 45
 
 // Y proximity to merge lines into block
 const BLOCK_Y_GAP = 40
@@ -17,10 +17,15 @@ type GlyphSegment = {
 }
 
 export function parseItems(text: string): TextItem[] {
+  // Strip pole ID markers (P388, P387, ...) and distance annotations (34.00, 76.00, ...)
+  // so they don't get consumed as part of equipment codes by the lazy regex
+  const cleaned = text
+    .replace(/P\d{3}/g, ' ')   // pole IDs (P388, P376…) are exactly 3 digits; equipment P-codes use single digit (M1P2W)
+    .replace(/\d+\.00/g, ' ')  // distance annotations: 34.00, 76.00, etc.
   const results: TextItem[] = []
   const regex = /([A-Z0-9][A-Z0-9\-\.,\/]*?)\s*(?:\[([A-Z]+)\]|\(([A-Z]+)\))/g
   let match: RegExpExecArray | null
-  while ((match = regex.exec(text)) !== null) {
+  while ((match = regex.exec(cleaned)) !== null) {
     const code = match[1].trim()
     const actionStr = (match[2] ?? match[3] ?? '').toUpperCase()
     if (actionStr === 'RM' || actionStr === 'IN' || actionStr === 'RP') {
@@ -42,8 +47,17 @@ async function collectSegments(page: PDFPageProxy): Promise<GlyphSegment[]> {
     const args = argsArray[i]
 
     if (fn === SET_FILL_RGB) {
-      const c = args[0] as Uint8ClampedArray
-      fillColor = [c[0], c[1], c[2]]
+      const c = args[0]
+      if (c instanceof Uint8ClampedArray && c.length >= 3) {
+        fillColor = [c[0], c[1], c[2]]
+      } else if (Array.isArray(c) && c.length >= 3) {
+        const max = Math.max(c[0], c[1], c[2])
+        const scale = max <= 1 ? 255 : 1
+        fillColor = [Math.round(c[0] * scale), Math.round(c[1] * scale), Math.round(c[2] * scale)]
+      } else if (typeof args[0] === 'number') {
+        // PDF.js passes r, g, b already in 0–255 range as separate args
+        fillColor = [Math.round(args[0] as number), Math.round(args[1] as number), Math.round(args[2] as number)]
+      }
     } else if (fn === SET_TEXT_MATRIX) {
       curX = args[4] as number
       curY = args[5] as number
@@ -95,7 +109,7 @@ function clusterIntoBlocks(
   }
   pushBlock(current, pageWidth, pageHeight, pageIndex, blocks)
 
-  return blocks.filter((b) => b.items.length > 0)
+  return blocks.filter((b) => b.items.length > 0 || /P\d+/.test(b.rawText))
 }
 
 function pushBlock(
@@ -107,7 +121,6 @@ function pushBlock(
 ) {
   const rawText = segs.map((s) => s.text).join('')
   const items = parseItems(rawText)
-  if (items.length === 0) return
 
   const xs = segs.map((s) => s.x)
   const ys = segs.map((s) => s.y)

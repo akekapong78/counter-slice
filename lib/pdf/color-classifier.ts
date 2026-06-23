@@ -1,7 +1,9 @@
 import type { RawTextBlock, ColorMapping, ExtractedBlock, Rect } from '@/lib/types'
 
-const POLE_Y_THRESHOLD = 50
-const POLE_X_THRESHOLD = 80
+// X-proximity fraction of the pole x-range used for column matching.
+// Engineering drawings place pole labels and equipment in the same vertical column
+// but at very different y positions, so y is not used as a matching criterion.
+const POLE_X_FRACTION = 0.03
 
 export function rgbToHex([r, g, b]: [number, number, number]): string {
   return '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')
@@ -37,16 +39,28 @@ function findPoleId(
   block: RawTextBlock,
   poleBlocks: RawTextBlock[]
 ): string | null {
-  for (const pb of poleBlocks) {
-    if (pb.pageIndex !== block.pageIndex) continue
+  const samePage = poleBlocks.filter((pb) => pb.pageIndex === block.pageIndex)
+  if (samePage.length === 0) return null
+
+  // Compute x-threshold from the spread of pole positions.
+  // Engineering drawings align equipment in the same vertical column as the pole label,
+  // but poles can be far apart — 3% of pole x-range captures nearby columns without
+  // bleeding into adjacent poles.
+  const poleXs = samePage.map((pb) => pb.x)
+  const xRange = Math.max(Math.max(...poleXs) - Math.min(...poleXs), block.pageWidth)
+  const xThresh = xRange * POLE_X_FRACTION
+
+  let best: { id: string; dx: number } | null = null
+  for (const pb of samePage) {
     const dx = Math.abs(pb.x - block.x)
-    const dy = Math.abs(pb.y - block.y)
-    if (dx <= POLE_X_THRESHOLD && dy <= POLE_Y_THRESHOLD) {
+    if (dx <= xThresh) {
       const match = pb.rawText.match(/P\d+/)
-      if (match) return match[0]
+      if (match && (!best || dx < best.dx)) {
+        best = { id: match[0], dx }
+      }
     }
   }
-  return null
+  return best ? best.id : null
 }
 
 export function resolveBlocks(

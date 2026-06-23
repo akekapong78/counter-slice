@@ -40,8 +40,7 @@ export default function UploadPage() {
         // Pole blocks: blocks whose rawText matches P\d+ pattern (no items, just pole ID)
         const poleBlocks = allRawBlocks.filter((b) => /P\d+/.test(b.rawText) && b.items.length === 0)
         const equipBlocks = allRawBlocks.filter((b) => b.items.length > 0)
-
-        const mappings = autoGuessMapping(equipBlocks)
+const mappings = autoGuessMapping(equipBlocks)
         const resolved = resolveBlocks(equipBlocks, mappings, poleBlocks)
 
         setFile(file.name, pdfDoc.numPages, arrayBuffer)
